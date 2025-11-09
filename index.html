@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--
+        LearnDOM – Master the Document Object Model
+        This single-file site uses only HTML, CSS, and vanilla JavaScript.
+        It teaches DOM fundamentals with explanations, highlighted code, and live demos.
+    -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LearnDOM – Master the Document Object Model</title>
+    <style>
+        /* ===============================
+           Global Dark Theme & Variables
+           =============================== */
+        :root {
+            --bg: #0f1115;
+            --surface: #141821;
+            --surface-2: #1b2130;
+            --text: #e5e7eb;
+            --muted: #9aa0aa;
+            --primary: #7c5cff;
+            --primary-2: #4e3aff;
+            --accent: #2dd4bf;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #22c55e;
+            --code-bg: #0b0d12;
+            --code-border: #2a3242;
+            --link: #93c5fd;
+            --selection: #1f2937;
+            --shadow: 0 10px 30px rgba(0,0,0,0.35);
+            --radius: 14px;
+            --radius-sm: 10px;
+            --radius-xs: 8px;
+            --maxw: 1100px;
+        }
+
+        /* Reset & Base */
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+            line-height: 1.65;
+        }
+        ::selection {
+            background: var(--selection);
+            color: var(--text);
+        }
+        a {
+            color: var(--link);
+            text-decoration: none;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ===============================
+           Layout: Header, Nav, Hero
+           =============================== */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(20, 24, 33, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #1f2635;
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 12px 20px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+        .brand .logo {
+            width: 40px;                /* slightly larger for better presence */
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(120% 120% at 50% 50%, rgba(124,92,255,0.22), rgba(45,212,191,0.12));
+            border: 1px solid #27324b;
+            box-shadow: 0 0 0 2px rgba(39,50,75,0.6), 0 10px 24px rgba(124,92,255,0.25);
+            display: grid;
+            place-items: center;
+            overflow: hidden;           /* keep image clipped to rounded corners */
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .brand .logo:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 2px rgba(39,50,75,0.8), 0 16px 34px rgba(124,92,255,0.33);
+        }
+        .brand .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;        /* preserve logo proportions */
+            display: block;
+            /* Color-aware tweaks for dark UI (keeps white logos crisp, strengthens color logos) */
+            filter: brightness(1.06) contrast(1.05) saturate(1.08) drop-shadow(0 1px 2px rgba(0,0,0,0.35));
+            /* If your logo is black-on-transparent and needs inversion on dark:
+               Uncomment the next line:
+               filter: invert(1) brightness(1.1) contrast(1.05);
+            */
+            background: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: var(--text);
+            transition: background 0.25s ease, transform 0.25s ease;
+        }
+        .nav-links a:hover {
+            background: var(--surface-2);
+            transform: translateY(-1px);
+        }
+        .nav-toggle {
+            display: none;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid #243049;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        /* Hero section */
+        .hero {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 60px 20px 40px;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+        }
+        .hero-card {
+            background: linear-gradient(180deg, rgba(124,92,255,0.15), rgba(45,212,191,0.08));
+            border: 1px solid #27324b;
+            border-radius: var(--radius);
+            padding: 34px;
+            box-shadow: var(--shadow);
+        }
+        .hero-title {
+            font-size: 2.2rem;
+            line-height: 1.2;
+            margin: 0 0 10px;
+        }
+        .hero-sub {
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(124,92,255,0.25);
+        }
+        .hero-visual {
+            background: radial-gradient(80% 80% at 60% 40%, rgba(124,92,255,0.2), rgba(27,33,48,0.9));
+            border: 1px solid #27324b;
+            border-radius: var(--radius);
+            padding: 24px;
+            display: grid;
+            place-items: center;
+            box-shadow: var(--shadow);
+        }
+        .hero-dom-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+        .hero-dom-grid .node {
+            height: 58px;
+            border-radius: 12px;
+            background: #1e2433;
+            border: 1px dashed #2b3751;
+            display: grid;
+            place-items: center;
+            color: #cbd5e1;
+            transition: transform 0.35s ease, background 0.35s ease, border-color 0.35s ease;
+        }
+        .hero-dom-grid .node:hover {
+            transform: translateY(-3px);
+            background: #242c3f;
+            border-color: var(--accent);
+        }
+
+        /* ===============================
+           Profile Avatar Styling
+           =============================== */
+        .profile { display:flex; align-items:center; gap:12px; margin-top:14px; }
+        .profile-name { margin:0; font-size:1.05rem; }
+        .avatar {
+            width:72px; height:72px; border-radius:50%;
+            padding:3px; /* ring padding */
+            background: radial-gradient(120% 120% at 50% 50%, rgba(124,92,255,0.22), rgba(45,212,191,0.12));
+            border: 1px solid #27324b;
+            box-shadow: 0 6px 18px rgba(124,92,255,0.18);
+            transition: transform 0.2s ease, box-shadow 0.25s ease;
+            display:grid; place-items:center;
+            overflow:hidden;
+        }
+        .avatar.xl { width:96px; height:96px; }
+        .avatar-img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; filter: brightness(1.05) contrast(1.04); }
+        .avatar:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 12px 28px rgba(124,92,255,0.28); }
+        @keyframes pulseRing {
+            0% { box-shadow: 0 0 0 0 rgba(124,92,255,0.35); }
+            100% { box-shadow: 0 0 0 16px rgba(124,92,255,0); }
+        }
+        .avatar.pulse { animation: pulseRing 1.8s ease-out infinite; }
+        .avatar.glow { box-shadow: 0 0 0 2px rgba(39,50,75,0.8), 0 16px 34px rgba(124,92,255,0.33); }
+
+        /* ===============================
+           Floating Profile (fixed left)
+           =============================== */
+        /* Container anchored to far left */
+        .floating-profile {
+            position: fixed;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 200;
+        }
+        /* Avatar button (small circle that enlarges on hover) */
+        .fp-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            padding: 2px;
+            background: radial-gradient(120% 120% at 50% 50%, rgba(124,92,255,0.35), rgba(45,212,191,0.14));
+            border: 1px solid #27324b;
+            box-shadow: 0 6px 18px rgba(124,92,255,0.18);
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            backdrop-filter: blur(2px);
+        }
+        .fp-avatar:hover { transform: scale(1.08); box-shadow: 0 14px 30px rgba(124,92,255,0.28); }
+        .fp-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; filter: brightness(1.06) contrast(1.05); }
+        /* Reveal card on hover */
+        .fp-card {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-12px) scale(0.96);
+            transition: opacity 0.28s ease, transform 0.28s ease, visibility 0s linear 0.28s;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(20, 24, 33, 0.70);
+            backdrop-filter: blur(10px);
+            border: 1px solid #27324b;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.45), 0 0 0 2px rgba(124,92,255,0.25);
+            min-width: 230px;
+        }
+        .floating-profile:hover .fp-card { opacity: 1; visibility: visible; transform: translateX(0) scale(1); transition: opacity 0.28s ease, transform 0.28s ease, visibility 0s; }
+        .fp-name { font-weight: 700; letter-spacing: 0.2px; margin: 0 0 4px; }
+        .fp-email { color: var(--link); }
+        .fp-email:hover { text-decoration: underline; }
+        /* Mobile position: bottom-left so it doesn’t block content */
+        @media (max-width: 720px) {
+            .floating-profile { top: auto; bottom: 18px; transform: none; }
+        }
+
+        /* ===============================
+           Sections and Cards
+           =============================== */
+        main {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 10px 20px 60px;
+        }
+        section.section {
+            margin: 26px 0;
+            padding: 18px 0;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid #243049;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid #243049;
+            background: linear-gradient(180deg, rgba(36,48,73,0.6), rgba(27,33,48,0.6));
+        }
+        .card-title {
+            font-size: 1.6rem;
+            margin: 0;
+            letter-spacing: 0.2px;
+        }
+        .card-body {
+            padding: 20px 22px;
+            display: grid;
+            gap: 22px;
+        }
+        .muted {
+            color: var(--muted);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        .grid-1 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        /* ===============================
+           Buttons & Controls
+           =============================== */
+        .btn {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #2b3751;
+            background: #1b2130;
+            color: var(--text);
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.3s ease, border-color 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            background: #21293b;
+            border-color: #334360;
+        }
+        .btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            color: white;
+            border: none;
+        }
+        .btn.outline {
+            background: transparent;
+            border: 1px dashed #384863;
+        }
+        .btn.danger {
+            background: #2a1f24;
+            border-color: #4b2025;
+            color: #fecaca;
+        }
+        .btn.success {
+            background: #192a21;
+            border-color: #2d4b3b;
+            color: #bbf7d0;
+        }
+        .btn.warn {
+            background: #2c2618;
+            border-color: #4b3e25;
+            color: #fef3c7;
+        }
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* ===============================
+           Code Block Styling
+           =============================== */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--code-border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #0f1420;
+            border-bottom: 1px solid #2a3242;
+        }
+        .code-header .lang {
+            font-size: 0.85rem;
+            color: #a6b0c0;
+        }
+        .code-header .copy {
+            font-size: 0.85rem;
+            color: #b5c1d6;
+            cursor: pointer;
+        }
+        pre {
+            margin: 0;
+            padding: 16px 18px;
+            overflow: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #d6dcec;
+        }
+
+        /* Simple token colors for lightweight syntax highlighting */
+        .tok-keyword { color: #93c5fd; }
+        .tok-string  { color: #fca5a5; }
+        .tok-number  { color: #fdba74; }
+        .tok-comment { color: #9aa0aa; font-style: italic; }
+        .tok-func    { color: #a7f3d0; }
+        .tok-dom     { color: #c4b5fd; }
+
+        /* ===============================
+           Live Demo Panels
+           =============================== */
+        .live-demo {
+            background: var(--surface-2);
+            border: 1px solid #2b3751;
+            border-radius: var(--radius-sm);
+            padding: 14px;
+        }
+        .demo-title {
+            font-weight: 600;
+            margin: 0 0 8px;
+        }
+        .demo-area {
+            background: #0f1420;
+            border: 1px solid #2a3242;
+            border-radius: var(--radius-xs);
+            padding: 12px;
+            min-height: 80px;
+        }
+        .log {
+            background: #101522;
+            border: 1px dashed #2a3242;
+            border-radius: var(--radius-xs);
+            padding: 10px;
+            color: #a6b0c0;
+            font-size: 0.92rem;
+            min-height: 38px;
+        }
+        .selected {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+            border-radius: 8px;
+            transition: outline-color 0.2s ease;
+        }
+
+        /* ===============================
+           Footer
+           =============================== */
+        footer {
+            margin-top: 30px;
+            padding: 24px 20px;
+            text-align: center;
+            color: var(--muted);
+            border-top: 1px solid #243049;
+            background: rgba(20, 24, 33, 0.7);
+        }
+
+        /* ===============================
+           Utilities
+           =============================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .kbd {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid #2a3242;
+            background: #0f1420;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        /* ===============================
+           Responsive
+           =============================== */
+        @media (max-width: 900px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 720px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                gap: 6px;
+                margin-top: 10px;
+            }
+            .nav-links.open {
+                display: flex;
+            }
+            .nav-toggle {
+                display: inline-block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===============================
+         Top Navigation (anchors to sections)
+         =============================== -->
+    <header>
+        <nav class="nav">
+            <div class="brand">
+                <div class="logo" aria-hidden="false">
+                    <img src=".vscode/images/logo.png.png" alt="Brand Logo" class="logo-img" />
+                </div>
+                <span>LearnDOM</span>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation" id="navToggle">Lessons</button>
+            <div class="nav-links" id="navLinks">
+                <a href="#what-is-dom">What is the DOM</a>
+                <a href="#selecting-elements">Selecting Elements</a>
+                <a href="#modifying-elements">Modifying Elements</a>
+                <a href="#events">Events</a>
+                <a href="#creating-removing">Create & Remove</a>
+                <a href="#practice-area">Practice Area</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Floating Profile Avatar (fixed left) -->
+    <!-- This small avatar enlarges on hover and reveals a contact card. -->
+    <div class="floating-profile" id="floatingProfile" aria-label="Profile and contact">
+        <button class="fp-avatar" aria-haspopup="true" aria-expanded="false">
+            <img src=".vscode/images/my%20pic.png" alt="Profile avatar of Rachid Bakkass" class="fp-img" />
+        </button>
+        <div class="fp-card" role="dialog" aria-label="Rachid Bakkass contact card">
+            <div class="fp-name">Rachid Bakkass</div>
+            <a class="fp-email" href="mailto:rachid.bakkass@gmail.com">rachid.bakkass@gmail.com</a>
+        </div>
+    </div>
+
+    <!-- ===============================
+         Hero Section
+         =============================== -->
+    <section class="hero">
+        <div class="hero-card reveal">
+            <h1 class="hero-title">LearnDOM – Master the Document Object Model</h1>
+            <p class="hero-sub">
+                The DOM is the programmable interface to your web page. Learn how to select, modify, listen for events, and dynamically create nodes — with live examples you can try instantly.
+            </p>
+            <button class="cta" id="getStartedBtn">
+                <span>Get Started</span>
+                <span aria-hidden="true">→</span>
+            </button>
+        </div>
+        <div class="hero-visual reveal" aria-hidden="true">
+            <!-- A playful DOM “nodes grid” visual -->
+            <div class="hero-dom-grid">
+                <div class="node">html</div>
+                <div class="node">head</div>
+                <div class="node">body</div>
+                <div class="node">div</div>
+                <div class="node">nav</div>
+                <div class="node">section</div>
+                <div class="node">button</div>
+                <div class="node">footer</div>
+                <div class="node">h1</div>
+                <div class="node">p</div>
+                <div class="node">ul</div>
+                <div class="node">li</div>
+                <div class="node">img</div>
+                <div class="node">a</div>
+                <div class="node">span</div>
+                <div class="node">script</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===============================
+         Main Content
+         =============================== -->
+    <main>
+        
+        <!-- What is the DOM -->
+        <section id="what-is-dom" class="section">
+            <div class="card reveal">
+                <div class="card-header">
+                    <h2 class="card-title">What is the DOM?</h2>
+                </div>
+                <div class="card-body grid-2">
+                    <div>
+                        <p>
+                            The Document Object Model (DOM) is a tree-like representation of your web page.
+                            It lets JavaScript read and change HTML and CSS at runtime. Every element — such as a paragraph, button, or image — is a node in this tree. You can traverse it, inspect it, and manipulate it with code.
+                        </p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="lang">JavaScript</span>
+                                <span class="copy" data-copy="#code-dom-intro">Copy</span>
+                            </div>
+                            <pre id="code-dom-intro" class="language-js"><code>
+// Explore the DOM tree
+console.log(document.title);       // Get page title
+console.log(document.body);        // Root of the visible content
+console.log(document.body.children); // HTMLCollection of child elements
+
+// Change something on the page
+document.body.style.backgroundColor = "#0f1115";
+                            </code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Live demo for DOM exploration -->
+                    <div>
+                        <div class="live-demo">
+                            <p class="demo-title">Live Example: Inspect & Highlight a DOM subtree</p>
+                            <div class="button-row" style="margin-bottom: 8px;">
+                                <button class="btn outline" id="domCountBtn">Count child elements</button>
+                                <button class="btn success" id="domHighlightBtn">Toggle highlights</button>
+                                <button class="btn warn" id="domResetBtn">Reset</button>
+                            </div>
+                            <div class="demo-area" id="domDemoArea">
+                                <!-- Demo content (subtree to inspect) -->
+                                <article id="domTree">
+                                    <h3>Mini DOM Tree</h3>
+                                    <p><strong>Paragraph A</strong> with <em>inline</em> emphasis.</p>
+                                    <div>
+                                        <button>Click Me (no-op)</button>
+                                        <span>Span Node</span>
+                                    </div>
+                                </article>
+                            </div>
+                            <div class="log" id="domLog">Log: Ready.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Selecting Elements -->
+        <section id="selecting-elements" class="section">
+            <div class="card reveal">
+                <div class="card-header">
+                    <h2 class="card-title">Selecting Elements</h2>
+                </div>
+                <div class="card-body grid-2">
+                    <div>
+                        <p>
+                            Selecting elements is the first step to interacting with the DOM. Common methods include
+                            <span class="kbd">getElementById</span>,
+                            <span class="kbd">getElementsByClassName</span>,
+                            <span class="kbd">getElementsByTagName</span>, and
+                            <span class="kbd">querySelector</span>/<span class="kbd">querySelectorAll</span>.
+                            The latter uses CSS selectors, making it very flexible.
+                        </p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="lang">JavaScript</span>
+                                <span class="copy" data-copy="#code-selecting">Copy</span>
+                            </div>
+                            <pre id="code-selecting" class="language-js"><code>
+// Examples of selecting elements
+const itemById = document.getElementById("special");
+const itemsByClass = document.getElementsByClassName("item");
+const parasByTag = document.getElementsByTagName("p");
+const allItems = document.querySelectorAll(".items .item");
+
+// Using querySelector (first match)
+const firstItem = document.querySelector(".items .item");
+
+// Highlight a selection
+firstItem.classList.add("selected");
+                            </code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Live demo -->
+                    <div>
+                        <div class="live-demo">
+                            <p class="demo-title">Live Example: Select and highlight</p>
+                            <div class="button-row" style="margin-bottom: 8px;">
+                                <button class="btn" id="selectByIdBtn">Select by ID</button>
+                                <button class="btn" id="selectByClassBtn">Select by Class</button>
+                                <button class="btn" id="selectByTagBtn">Select by Tag</button>
+                                <button class="btn" id="selectByQueryBtn">Select with querySelectorAll</button>
+                                <button class="btn outline" id="clearSelectionBtn">Clear selection</button>
+                            </div>
+                            <div class="demo-area">
+                                <div class="items" id="itemsDemo">
+                                    <p class="item">Item 1</p>
+                                    <p class="item">Item 2</p>
+                                    <p id="special" class="item">Special Item</p>
+                                    <p class="item">Item 4</p>
+                                </div>
+                            </div>
+                            <div class="log" id="selectLog">Log: Ready to select.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modifying Elements -->
+        <section id="modifying-elements" class="section">
+            <div class="card reveal">
+                <div class="card-header">
+                    <h2 class="card-title">Modifying Elements</h2>
+                </div>
+                <div class="card-body grid-2">
+                    <div>
+                        <p>
+                            Once you’ve selected an element, you can change its text, styles, attributes, and structure.
+                            Use properties like <span class="kbd">textContent</span>, <span class="kbd">innerHTML</span>,
+                            <span class="kbd">style</span>, and methods like <span class="kbd">setAttribute</span>.
+                        </p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="lang">JavaScript</span>
+                                <span class="copy" data-copy="#code-modifying">Copy</span>
+                            </div>
+                            <pre id="code-modifying" class="language-js"><code>
+// Modify content and style
+const target = document.querySelector("#modifyTarget");
+target.textContent = "Updated text!";
+target.style.color = "#2dd4bf";
+target.style.fontWeight = "700";
+
+// Toggle a custom attribute
+if (target.hasAttribute("data-demo")) {
+  target.removeAttribute("data-demo");
+} else {
+  target.setAttribute("data-demo", "true");
+}
+                            </code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Live demo -->
+                    <div>
+                        <div class="live-demo">
+                            <p class="demo-title">Live Example: Change text, style, and attributes</p>
+                            <div class="button-row" style="margin-bottom: 8px;">
+                                <button class="btn success" id="changeTextBtn">Change Text</button>
+                                <button class="btn success" id="changeColorBtn">Change Color</button>
+                                <button class="btn warn" id="toggleAttrBtn">Toggle Attribute</button>
+                                <button class="btn outline" id="resetModifyBtn">Reset</button>
+                            </div>
+                            <div class="demo-area">
+                                <p id="modifyTarget">This is the original text.</p>
+                            </div>
+                            <div class="log" id="modifyLog">Log: Ready to modify.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Events and Event Listeners -->
+        <section id="events" class="section">
+            <div class="card reveal">
+                <div class="card-header">
+                    <h2 class="card-title">Events and Event Listeners</h2>
+                </div>
+                <div class="card-body grid-2">
+                    <div>
+                        <p>
+                            Events let you respond to user interactions like clicks, key presses, and mouse moves.
+                            Attach listeners with <span class="kbd">addEventListener</span>, and remove them with
+                            <span class="kbd">removeEventListener</span>. Inside handlers, inspect the event
+                            <span class="kbd">target</span> and type.
+                        </p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="lang">JavaScript</span>
+                                <span class="copy" data-copy="#code-events">Copy</span>
+                            </div>
+                            <pre id="code-events" class="language-js"><code>
+// Add event listeners to multiple elements
+const boxes = document.querySelectorAll(".event-box");
+function onBoxClick(e) {
+  const el = e.currentTarget;
+  el.classList.toggle("selected");          // Toggle highlight
+  console.log("Clicked:", el.dataset.boxId); // Inspect custom data
+}
+
+boxes.forEach(box => box.addEventListener("click", onBoxClick));
+
+// Later, remove listeners
+boxes.forEach(box => box.removeEventListener("click", onBoxClick));
+                            </code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Live demo -->
+                    <div>
+                        <div class="live-demo">
+                            <p class="demo-title">Live Example: Click boxes to toggle state</p>
+                            <div class="button-row" style="margin-bottom: 8px;">
+                                <button class="btn primary" id="attachListenersBtn">Attach Listeners</button>
+                                <button class="btn outline" id="removeListenersBtn">Remove Listeners</button>
+                                <button class="btn warn" id="resetBoxesBtn">Reset</button>
+                            </div>
+                            <div class="demo-area" id="boxesArea" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                                <div class="event-box" data-box-id="A" style="height: 64px; border-radius: 10px; background:#222a3a; display:grid; place-items:center;">A</div>
+                                <div class="event-box" data-box-id="B" style="height: 64px; border-radius: 10px; background:#222a3a; display:grid; place-items:center;">B</div>
+                                <div class="event-box" data-box-id="C" style="height: 64px; border-radius: 10px; background:#222a3a; display:grid; place-items:center;">C</div>
+                            </div>
+                            <div class="log" id="eventsLog">Log: Attach the listeners, then click boxes.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Creating and Removing Nodes -->
+        <section id="creating-removing" class="section">
+            <div class="card reveal">
+                <div class="card-header">
+                    <h2 class="card-title">Creating and Removing Nodes</h2>
+                </div>
+                <div class="card-body grid-2">
+                    <div>
+                        <p>
+                            You can create elements with <span class="kbd">document.createElement</span>, set their
+                            <span class="kbd">textContent</span>, attributes, and append them with
+                            <span class="kbd">appendChild</span>. Remove elements via
+                            <span class="kbd">removeChild</span> or <span class="kbd">element.remove()</span>.
+                        </p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="lang">JavaScript</span>
+                                <span class="copy" data-copy="#code-create-remove">Copy</span>
+                            </div>
+                            <pre id="code-create-remove" class="language-js"><code>
+// Create and append a new list item
+const list = document.querySelector("#demoList");
+const li = document.createElement("li");
+li.textContent = "New item";
+li.setAttribute("data-id", Date.now().toString());
+list.appendChild(li);
+
+// Remove the last item
+if (list.lastElementChild) {
+  list.removeChild(list.lastElementChild);
+}
+                            </code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Live demo -->
+                    <div>
+                        <div class="live-demo">
+                            <p class="demo-title">Live Example: Add and remove list items</p>
+                            <div class="button-row" style="margin-bottom: 8px;">
+                                <button class="btn success" id="addItemBtn">Add Item</button>
+                                <button class="btn danger" id="removeItemBtn">Remove Last</button>
+                                <button class="btn outline" id="resetListBtn">Reset List</button>
+                            </div>
+                            <div class="demo-area">
+                                <ul id="demoList">
+                                    <li>Learn selectors</li>
+                                    <li>Modify elements</li>
+                                    <li>Handle events</li>
+                                </ul>
+                            </div>
+                            <div class="log" id="listLog">Log: Ready to add or remove.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Real-time Practice Area -->
+        <section id="practice-area" class="section">
+            <div class="card reveal">
+                <div class="card-header">
+                    <h2 class="card-title">Real-time Practice Area</h2>
+                </div>
+                <div class="card-body grid-2">
+                    <div>
+                        <p>
+                            Practice safely in a sandbox. Write JavaScript that receives a single variable
+                            <span class="kbd">sandbox</span> — a container you can query and modify. Try
+                            <span class="kbd">sandbox.querySelector</span>, <span class="kbd">appendChild</span>,
+                            <span class="kbd">addEventListener</span>, and more.
+                        </p>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="lang">JavaScript</span>
+                                <span class="copy" data-copy="#code-practice">Copy</span>
+                            </div>
+                            <pre id="code-practice" class="language-js"><code>
+// You can interact with the sandbox container.
+// Try selecting, styling, and creating nodes.
+const title = sandbox.querySelector(".title");
+title.textContent = "Hello from your code!";
+
+const btn = sandbox.querySelector(".practice-btn");
+btn.addEventListener("click", () => {
+  const note = document.createElement("p");
+  note.textContent = "You clicked the sandbox button.";
+  note.style.color = "#2dd4bf";
+  sandbox.appendChild(note);
+});
+                            </code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Live practice -->
+                    <div>
+                        <div class="live-demo">
+                            <p class="demo-title">Sandbox: Write & Run Code</p>
+                            <div class="button-row" style="margin-bottom: 8px;">
+                                <button class="btn primary" id="runCodeBtn">Run Code</button>
+                                <button class="btn outline" id="resetSandboxBtn">Reset Sandbox</button>
+                            </div>
+                            <div class="demo-area" id="sandboxArea">
+                                <div class="sandbox-content">
+                                    <h4 class="title">Sandbox Title</h4>
+                                    <button class="btn practice-btn">Sandbox Button</button>
+                                    <p class="muted" style="margin-top:8px;">Tip: Use <span class="kbd">sandbox.querySelector</span> to target elements here.</p>
+                                </div>
+                            </div>
+                            <textarea id="practiceEditor" spellcheck="false" style="width:100%; height:150px; margin-top:10px; border-radius:10px; border:1px solid #2a3242; background:#0f1420; color:#d6dcec; padding:10px;">
+// Write JavaScript here. You have access to the "sandbox" variable.
+// Example:
+const title = sandbox.querySelector(".title");
+title.textContent = "Hello from your code!";
+
+const btn = sandbox.querySelector(".practice-btn");
+btn.addEventListener("click", () => {
+  const note = document.createElement("p");
+  note.textContent = "You clicked the sandbox button.";
+  note.style.color = "#2dd4bf";
+  sandbox.appendChild(note);
+});
+                            </textarea>
+                            <div class="log" id="practiceLog">Log: Write code and click "Run Code".</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===============================
+         Footer
+         =============================== -->
+    <footer>
+        Created by [Your Name] – Learn DOM Step by Step
+    </footer>
+
+    <!-- ===============================
+         JavaScript
+         ===============================
+         The JS below wires up:
+         - Smooth scroll for anchor links and "Get Started"
+         - Mobile nav toggle
+         - Lightweight code highlighting
+         - IntersectionObserver reveal animations
+         - Live demos for each lesson
+         - Practice sandbox executor
+    -->
+    <script>
+        // Smooth scroll for nav anchors and CTA
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const id = link.getAttribute('href').slice(1);
+                const target = document.getElementById(id);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+        document.getElementById('getStartedBtn')?.addEventListener('click', () => {
+            document.getElementById('what-is-dom')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        // Mobile nav toggle
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle?.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+
+        // IntersectionObserver for reveal animations
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // =====================================================
+        // Lightweight syntax highlighting for JS code blocks (fixed)
+        // =====================================================
+        // Safely run replacements only on plain text, not inside tags we already added.
+        function replaceOutsideTags(str, regex, replacer) {
+            return str
+                .split(/(<[^>]+>)/g)         // keep existing tags intact
+                .map(part => (part.startsWith('<') ? part : part.replace(regex, replacer)))
+                .join('');
+        }
+
+        function highlightJS(code) {
+            // Escape HTML first
+            const escape = s => s
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            let text = escape(code);
+
+            // Comments
+            text = replaceOutsideTags(text, /(\/\/.*?$)/gm, '<span class="tok-comment">$1</span>');
+            text = replaceOutsideTags(text, /(\/\*[\s\S]*?\*\/)/gm, '<span class="tok-comment">$1</span>');
+
+            // Strings
+            text = replaceOutsideTags(text, /("[^"]*"|'[^']*'|`[^`]*`)/g, '<span class="tok-string">$1</span>');
+
+            // Numbers
+            text = replaceOutsideTags(text, /\b(\d+)\b/g, '<span class="tok-number">$1</span>');
+
+            // Keywords
+            const kw = ['const','let','var','function','return','if','else','for','while','do','switch','case','break','continue','try','catch','finally','new','class'];
+            text = replaceOutsideTags(text, new RegExp('\\b(' + kw.join('|') + ')\\b', 'g'), '<span class="tok-keyword">$1</span>');
+
+            // Common DOM APIs
+            const dom = ['document','window','querySelector','querySelectorAll','getElementById','getElementsByClassName','getElementsByTagName','appendChild','removeChild','addEventListener','removeEventListener','classList','textContent','innerHTML','style','setAttribute','hasAttribute','removeAttribute'];
+            text = replaceOutsideTags(text, new RegExp('\\b(' + dom.join('|') + ')\\b', 'g'), '<span class="tok-dom">$1</span>');
+
+            // Simple function call highlight (outside tags only)
+            text = replaceOutsideTags(text, /([A-Za-z_$][\w$]*)\s*(?=\()/g, '<span class="tok-func">$1</span>');
+
+            return text;
+        }
+
+        function applyHighlighting() {
+            document.querySelectorAll('pre.language-js code').forEach(codeEl => {
+                const raw = codeEl.textContent;
+                codeEl.innerHTML = highlightJS(raw); // render spans safely
+            });
+        }
+        applyHighlighting();
+
+        // Copy-to-clipboard for code blocks
+        document.querySelectorAll('.code-header .copy').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sel = btn.getAttribute('data-copy');
+                const pre = document.querySelector(sel + ' code');
+                if (!pre) return;
+                const text = pre.textContent;
+                navigator.clipboard?.writeText(text).then(() => {
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => btn.textContent = 'Copy', 1200);
+                });
+            });
+        });
+
+        // =====================================================
+        // Live Demo: What is the DOM
+        // =====================================================
+        const domTree = document.getElementById('domTree');
+        const domLog = document.getElementById('domLog');
+        const domCountBtn = document.getElementById('domCountBtn');
+        const domHighlightBtn = document.getElementById('domHighlightBtn');
+        const domResetBtn = document.getElementById('domResetBtn');
+
+        let domHighlighted = false;
+        domCountBtn?.addEventListener('click', () => {
+            const count = domTree.querySelectorAll('*').length;
+            domLog.textContent = `Log: This subtree has ${count} element nodes.`;
+        });
+        domHighlightBtn?.addEventListener('click', () => {
+            domHighlighted = !domHighlighted;
+            domTree.querySelectorAll('*').forEach(el => {
+                el.classList.toggle('selected', domHighlighted);
+            });
+            domLog.textContent = domHighlighted ? 'Log: Highlights ON.' : 'Log: Highlights OFF.';
+        });
+        domResetBtn?.addEventListener('click', () => {
+            domHighlighted = false;
+            domTree.querySelectorAll('*').forEach(el => el.classList.remove('selected'));
+            domLog.textContent = 'Log: Reset.';
+        });
+
+        // =====================================================
+        // Live Demo: Selecting Elements
+        // =====================================================
+        const selectLog = document.getElementById('selectLog');
+        const itemsDemo = document.getElementById('itemsDemo');
+        const selectByIdBtn = document.getElementById('selectByIdBtn');
+        const selectByClassBtn = document.getElementById('selectByClassBtn');
+        const selectByTagBtn = document.getElementById('selectByTagBtn');
+        const selectByQueryBtn = document.getElementById('selectByQueryBtn');
+        const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+
+        function clearSelection() {
+            itemsDemo.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+        }
+        selectByIdBtn?.addEventListener('click', () => {
+            clearSelection();
+            const el = document.getElementById('special');
+            el?.classList.add('selected');
+            selectLog.textContent = 'Log: Selected element by ID (#special).';
+        });
+        selectByClassBtn?.addEventListener('click', () => {
+            clearSelection();
+            const els = document.getElementsByClassName('item');
+            Array.from(els).forEach(el => el.classList.add('selected'));
+            selectLog.textContent = `Log: Selected ${els.length} elements by class (.item).`;
+        });
+        selectByTagBtn?.addEventListener('click', () => {
+            clearSelection();
+            const els = document.getElementsByTagName('p');
+            Array.from(els).forEach(el => el.classList.add('selected'));
+            selectLog.textContent = `Log: Selected ${els.length} <p> elements by tag.`;
+        });
+        selectByQueryBtn?.addEventListener('click', () => {
+            clearSelection();
+            const els = document.querySelectorAll('.items .item');
+            els.forEach(el => el.classList.add('selected'));
+            selectLog.textContent = `Log: Selected ${els.length} elements using querySelectorAll(.items .item).`;
+        });
+        clearSelectionBtn?.addEventListener('click', () => {
+            clearSelection();
+            selectLog.textContent = 'Log: Cleared selection.';
+        });
+
+        // =====================================================
+        // Live Demo: Modifying Elements
+        // =====================================================
+        const modifyTarget = document.getElementById('modifyTarget');
+        const modifyLog = document.getElementById('modifyLog');
+        const changeTextBtn = document.getElementById('changeTextBtn');
+        const changeColorBtn = document.getElementById('changeColorBtn');
+        const toggleAttrBtn = document.getElementById('toggleAttrBtn');
+        const resetModifyBtn = document.getElementById('resetModifyBtn');
+
+        changeTextBtn?.addEventListener('click', () => {
+            modifyTarget.textContent = 'Updated text via JS!';
+            modifyLog.textContent = 'Log: Changed textContent.';
+        });
+        changeColorBtn?.addEventListener('click', () => {
+            modifyTarget.style.color = '#2dd4bf';
+            modifyTarget.style.fontWeight = '700';
+            modifyLog.textContent = 'Log: Updated style (color, fontWeight).';
+        });
+        toggleAttrBtn?.addEventListener('click', () => {
+            if (modifyTarget.hasAttribute('data-demo')) {
+                modifyTarget.removeAttribute('data-demo');
+                modifyLog.textContent = 'Log: Removed attribute data-demo.';
+            } else {
+                modifyTarget.setAttribute('data-demo', 'true');
+                modifyLog.textContent = 'Log: Added attribute data-demo=true.';
+            }
+        });
+        resetModifyBtn?.addEventListener('click', () => {
+            modifyTarget.textContent = 'This is the original text.';
+            modifyTarget.style = '';
+            modifyTarget.removeAttribute('data-demo');
+            modifyLog.textContent = 'Log: Reset element to defaults.';
+        });
+
+        // =====================================================
+        // Live Demo: Events and Event Listeners
+        // =====================================================
+        const boxesArea = document.getElementById('boxesArea');
+        const eventsLog = document.getElementById('eventsLog');
+        const attachListenersBtn = document.getElementById('attachListenersBtn');
+        const removeListenersBtn = document.getElementById('removeListenersBtn');
+        const resetBoxesBtn = document.getElementById('resetBoxesBtn');
+
+        const boxes = boxesArea.querySelectorAll('.event-box');
+
+        function onBoxClick(e) {
+            const el = e.currentTarget;
+            el.classList.toggle('selected');
+            eventsLog.textContent = `Log: Clicked box ${el.dataset.boxId}. Selected=${el.classList.contains('selected')}`;
+        }
+
+        attachListenersBtn?.addEventListener('click', () => {
+            boxes.forEach(b => b.addEventListener('click', onBoxClick));
+            eventsLog.textContent = 'Log: Listeners attached. Click boxes!';
+        });
+        removeListenersBtn?.addEventListener('click', () => {
+            boxes.forEach(b => b.removeEventListener('click', onBoxClick));
+            eventsLog.textContent = 'Log: Listeners removed.';
+        });
+        resetBoxesBtn?.addEventListener('click', () => {
+            boxes.forEach(b => b.classList.remove('selected'));
+            eventsLog.textContent = 'Log: Boxes reset.';
+        });
+
+        // =====================================================
+        // Live Demo: Creating and Removing Nodes
+        // =====================================================
+        const demoList = document.getElementById('demoList');
+        const listLog = document.getElementById('listLog');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const removeItemBtn = document.getElementById('removeItemBtn');
+        const resetListBtn = document.getElementById('resetListBtn');
+
+        addItemBtn?.addEventListener('click', () => {
+            const li = document.createElement('li');
+            li.textContent = 'New item';
+            li.setAttribute('data-id', Date.now().toString());
+            demoList.appendChild(li);
+            listLog.textContent = `Log: Added item with data-id=${li.getAttribute('data-id')}.`;
+        });
+        removeItemBtn?.addEventListener('click', () => {
+            const last = demoList.lastElementChild;
+            if (last) {
+                demoList.removeChild(last);
+                listLog.textContent = 'Log: Removed last item.';
+            } else {
+                listLog.textContent = 'Log: Nothing to remove.';
+            }
+        });
+        resetListBtn?.addEventListener('click', () => {
+            demoList.innerHTML = `
+                <li>Learn selectors</li>
+                <li>Modify elements</li>
+                <li>Handle events</li>
+            `;
+            listLog.textContent = 'Log: List reset.';
+        });
+
+        // =====================================================
+        // Practice Sandbox Executor
+        // =====================================================
+        const practiceEditor = document.getElementById('practiceEditor');
+        const sandboxArea = document.getElementById('sandboxArea');
+        const practiceLog = document.getElementById('practiceLog');
+        const runCodeBtn = document.getElementById('runCodeBtn');
+        const resetSandboxBtn = document.getElementById('resetSandboxBtn');
+
+        function resetSandbox() {
+            sandboxArea.innerHTML = `
+                <div class="sandbox-content">
+                    <h4 class="title">Sandbox Title</h4>
+                    <button class="btn practice-btn">Sandbox Button</button>
+                    <p class="muted" style="margin-top:8px;">Tip: Use <span class="kbd">sandbox.querySelector</span> to target elements here.</p>
+                </div>
+            `;
+        }
+        resetSandbox(); // initialize on load
+
+        runCodeBtn?.addEventListener('click', () => {
+            const code = practiceEditor.value;
+            try {
+                // Provide only "sandbox" in scope for the user’s code
+                const fn = new Function('sandbox', code);
+                fn(sandboxArea.querySelector('.sandbox-content'));
+                practiceLog.textContent = 'Log: Code ran successfully.';
+            } catch (err) {
+                practiceLog.textContent = 'Error: ' + err.message;
+            }
+        });
+        resetSandboxBtn?.addEventListener('click', () => {
+            resetSandbox();
+            practiceLog.textContent = 'Log: Sandbox reset.';
+        });
+
+        // (Removed Profile Avatar Interactions; keeping only floating avatar behavior)
+
+        // =====================================================
+        // Floating Profile accessibility hooks
+        // =====================================================
+        const floatingProfile = document.getElementById('floatingProfile');
+        const fpAvatarBtn = floatingProfile?.querySelector('.fp-avatar');
+        floatingProfile?.addEventListener('mouseenter', () => {
+            fpAvatarBtn?.setAttribute('aria-expanded', 'true');
+        });
+        floatingProfile?.addEventListener('mouseleave', () => {
+            fpAvatarBtn?.setAttribute('aria-expanded', 'false');
+        });
+        fpAvatarBtn?.addEventListener('focus', () => fpAvatarBtn.setAttribute('aria-expanded', 'true'));
+        fpAvatarBtn?.addEventListener('blur', () => fpAvatarBtn.setAttribute('aria-expanded', 'false'));
+    </script>
+</body>
+</html>
